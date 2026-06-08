@@ -121,8 +121,11 @@ def write_metrics_csv(path, rows):
         "index_params",
         "build_time_ms",
         "index_size_mb",
+        "search_time_sec",
         "qps",
         "recall_at_10",
+        "results_ivecs",
+        "index_path",
     ]
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)

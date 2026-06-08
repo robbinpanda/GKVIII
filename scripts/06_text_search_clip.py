@@ -32,6 +32,19 @@ def resolve_device(device):
     return device
 
 
+def image_features(model, pixel_values):
+    outputs = model.vision_model(pixel_values=pixel_values)
+    return model.visual_projection(outputs.pooler_output)
+
+
+def text_features(model, inputs):
+    outputs = model.text_model(
+        input_ids=inputs["input_ids"],
+        attention_mask=inputs.get("attention_mask"),
+    )
+    return model.text_projection(outputs.pooler_output)
+
+
 def embed_images(args, rows, processor, model, device):
     cache_path = Path(args.image_fvecs)
     if cache_path.exists() and not args.rebuild_image_vectors:
@@ -49,7 +62,7 @@ def embed_images(args, rows, processor, model, device):
         pixel_values = inputs["pixel_values"].to(device)
 
         with torch.no_grad():
-            features = model.get_image_features(pixel_values=pixel_values)
+            features = image_features(model, pixel_values)
             if args.normalize:
                 features = torch.nn.functional.normalize(features, p=2, dim=1)
         all_vectors.append(features.cpu().numpy().astype("float32"))
@@ -64,7 +77,7 @@ def embed_texts(args, processor, model, device):
     inputs = processor(text=args.queries, padding=True, truncation=True, return_tensors="pt")
     inputs = {key: value.to(device) for key, value in inputs.items()}
     with torch.no_grad():
-        features = model.get_text_features(**inputs)
+        features = text_features(model, inputs)
         if args.normalize:
             features = torch.nn.functional.normalize(features, p=2, dim=1)
     return features.cpu().numpy().astype("float32")
