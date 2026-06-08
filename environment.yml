@@ -1,0 +1,17 @@
+name: image-vector-search
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pillow
+  - matplotlib
+  - pandas
+  - tqdm
+  - pytorch
+  - torchvision
+  - faiss-cpu
+  - pip:
+      - transformers
